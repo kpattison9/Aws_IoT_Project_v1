@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Cardinal Engineering Sensor Map</title>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <link rel="stylesheet"      href="https://js.arcgis.com/4.18/esri/themes/light/main.css">
+    <script>
+    //  fetch("Sensor1.json")
+    //      .then(response => response.json())
+    //      .then(data => {
+    //          console.log(data.location)
+    //          document.getElementById('sensorData').innerHTML = data.location;
+    //      })
+    </script>
+
+    <script src="https://js.arcgis.com/4.18/"></script>
+    <script>
+      var sensorData = new Array(2);
+      var labels = null;
+      var labelsTxt = null;
+  
+      //var locSpl = string.split(locStr);
+      fetch("Sensor1")
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.location)
+            //document.getElementById('sensorData').innerHTML = data;
+            //locStr = data.location;
+            //locSplit = locStr.split(',') 
+            var temp = data.location.split(', ');
+            var tempLoc = temp[0].split(' ');
+            
+            var tempDegs = parseInt(tempLoc[0]);
+            if (tempDegs >=0) {
+              sensorData[0] = tempDegs + (parseFloat(tempLoc[1] / 60));
+            } else {
+              sensorData[0] = tempDegs - (parseFloat(tempLoc[1] / 60));
+            }
+
+            tempLoc = temp[1].split(' ');
+            tempDegs = parseInt(tempLoc[0]);
+            if (tempDegs >=0) {
+              sensorData[1] = tempDegs + (parseFloat(tempLoc[1] / 60));
+            } else {
+              sensorData[1] = tempDegs - (parseFloat(tempLoc[1] / 60));
+            }
+            labels = "Time: " + data.time + " UTC\n" + "Temp: " + data.temperature + " degF\n" + 
+            "Hdg: " + data.heading + " deg\n" +
+             "Speed: " + data.speed + " km/h \n" + 
+             "Course: " + data.course + "\n"; 
+            labelsTxt = labels;
+      })
+      
+      require([
+        "esri/config",
+        "esri/Map", 
+        "esri/views/MapView", 
+        "esri/Graphic",
+        "esri/layers/GraphicsLayer",
+        //"esri/layers/FeatureLayer", 
+        "esri/PopupTemplate"], function (esriConfig,Map, MapView, Graphic, GraphicsLayer, PopupTemplate) {
+        esriConfig.apiKey = "AAPKbc9ca5b7f50b4673bebe25bf4526f95b1DE-TNloOjKtrGMT9kAbXsBB45KXKeELfHEBSm3NWPaHjF06QmubFBOKfGGBgZ4_";
+
+        const map = new Map({
+          basemap: "arcgis-topographic" // Basemap layer service
+        });
+        
+        
+        
+        //var data = document.getElementById('sensorData').innerHTML;
+        //var locStr = sensorData;
+        //var locSplit = locStr.split(',');
+
+        const view = new MapView({
+          map: map,
+          center: [sensorData[1], sensorData[0]], // Longitude, latitude
+          zoom: 13, // Zoom level
+          container: "viewDiv" // Div element
+ 
+        });
+        
+        const graphicsLayer = new GraphicsLayer();
+        //const featureLayer = new FeatureLayer();
+        map.add(graphicsLayer);
+        //map.add(featureLayer);
+
+        const point = { //Create a point
+            type: "point",
+            longitude: sensorData[1],
+            latitude: sensorData[0], 
+        };
+        
+        const markerSymbol = {
+            type: "simple-marker",
+            color: [226, 119, 40],  // Orange
+            outline: {
+                color: [255, 255, 255], // White
+                width: 2
+            }
+        };
+
+        const labelSymbol = {
+          type: "text",
+          color: "black",
+          text: labelsTxt,
+          haloColor: "white",
+          horizontalAlignment: "left",
+          haloSize: 10,
+          xoffset: 0,
+          yoffset: -15,
+        };
+
+        const pointGraphic = new Graphic({
+          geometry: point,
+          symbol: markerSymbol
+        });
+
+        const labelGraphic = new Graphic ({
+          geometry: point, 
+          symbol: labelSymbol
+        })
+
+        //var a = pointGraphic.getEffectivePopupTemplate;
+        //a.title = "This is the Location of Sensor 1"
+        
+        graphicsLayer.add(pointGraphic);
+        graphicsLayer.add(labelGraphic);
+      });
+    </script>
+    
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>

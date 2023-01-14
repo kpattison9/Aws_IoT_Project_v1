@@ -1,0 +1,9 @@
+[submodule "iot_gateway"]
+	path = iot_gateway
+	url = https://github.com/kpattison9/iot_gateway.git
+[submodule "Remote"]
+	path = Remote
+	url = https://github.com/kpattison9/Feather9x_RemoteModule.git
+[submodule "Receiver"]
+	path = Receiver
+	url = https://github.com/kpattison9/Feather9x_RX.git
